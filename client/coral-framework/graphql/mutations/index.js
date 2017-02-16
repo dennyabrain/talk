@@ -43,11 +43,19 @@ export const postLike = graphql(POST_LIKE, {
 
 export const postFlag = graphql(POST_FLAG, {
   props: ({mutate}) => ({
-    postFlag: (flag) => {
+    postFlag: (flag, parentId) => {
       return mutate({
         variables: {
           flag
-        }
+        },
+        optimisticResponse: {
+          createFlag: {
+            flag: {
+              id: `${Date.now()}_temp_id`
+            }
+          }
+        },
+        updateQueries: postActionUpdate(parentId, flag.item_id, 'FlagAction')
       });
     }}),
 });
