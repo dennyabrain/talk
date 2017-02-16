@@ -1,6 +1,7 @@
 import {graphql} from 'react-apollo';
 import STREAM_QUERY from './streamQuery.graphql';
 import LOAD_MORE from './loadMore.graphql';
+import loadMoreUpdate from '../updateQueries/LoadMore';
 import MY_COMMENT_HISTORY from './myCommentHistory.graphql';
 
 function getQueryVariable(variable) {
@@ -35,28 +36,7 @@ export const queryStream = graphql(STREAM_QUERY, {
           asset_id,
           sort
         },
-        updateQuery: (oldData, {fetchMoreResult:{data:{new_top_level_comments}}}) =>
-
-          // If loading more replies
-          parent_id ? {
-            ...oldData,
-            asset: {
-              ...oldData.asset,
-              comments: oldData.asset.comments.map((comment) =>
-                comment.id === parent_id
-                ? {...comment, replies: [...comment.replies, ...new_top_level_comments]}
-                : comment)
-            }
-          }
-
-          // If loading more top-level comments
-          : {
-            ...oldData,
-            asset: {
-              ...oldData.asset,
-              comments: [...oldData.asset.comments, ...new_top_level_comments]
-            }
-          }
+        updateQuery: loadMoreUpdate(parent_id)
       });
     }
   })
